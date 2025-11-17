@@ -1,143 +1,98 @@
-# Sistema Inteligente de Irrigação com ESP32 e Dashboard IoT
+# 💧 Sistema Inteligente de Irrigação com ESP32 e Dashboard IoT
 
-Este projeto implementa um sistema integrado de irrigação automática utilizando um microcontrolador ESP32, um sensor de umidade simulado, uma bomba d’água controlada por relé e comunicação via Wi-Fi com um dashboard MQTT no Shiftr.io. O objetivo é monitorar o estado do solo e controlar a irrigação de forma automática, apresentando as informações em tempo real ao usuário.
+## Visão Geral do Projeto
 
-## **Integrantes**
+Este projeto implementa um **sistema integrado de irrigação automática** utilizando o microcontrolador **ESP32**, focado na simulação de um ambiente IoT completo. O sistema monitora o estado do solo (simulado), controla uma bomba d'água via relé e utiliza o protocolo **MQTT** para comunicação em tempo real com um dashboard no **Shiftr.io**.
 
-Gabriel Caldeira, Gustavo Marchiori e João Weslen.
+O principal objetivo é demonstrar a automação de processos agrícolas ou de jardinagem, oferecendo ao usuário uma visualização em tempo real dos parâmetros críticos do sistema.
 
-## **Visão Geral do Sistema**
+**Integrantes:** Gabriel Caldeira, Gustavo Marchiori e João Weslen.
 
-O sistema funciona como um controlador automático de irrigação. Ele monitora:
+## Funcionalidades Principais
 
-- Umidade do solo (simulada com sensor DHT22 no Wokwi)
+O sistema atua como um controlador automático de irrigação, realizando as seguintes funções:
 
-- Nível de água do reservatório (variável interna no firmware)
+1.  **Monitoramento Simulado:** Acompanhamento contínuo da umidade do solo (simulada via sensor DHT22 no Wokwi) e do nível de água do reservatório (variável interna).
+2.  **Controle Automático:** Acionamento da bomba d'água (controlada por relé) quando a umidade do solo cai abaixo de um limite configurado.
+3.  **Gestão de Recursos:** Bloqueio da irrigação quando o nível de água do reservatório atinge o mínimo, com ativação de um LED indicador.
+4.  **Interação Física:** Possibilidade de reabastecer o reservatório (simulado) através de um botão físico.
+5.  **Visualização IoT:** Envio de todos os dados de monitoramento (umidade, temperatura, estado da bomba, nível de água) para um dashboard MQTT em tempo real no Shiftr.io.
 
-- Estado da bomba (ativa/desativada)
+## Tecnologias Utilizadas
 
-A lógica principal consiste em:
+| Componente | Tecnologia/Plataforma | Função |
+| :--- | :--- | :--- |
+| **Microcontrolador** | ESP32 DevKit V1 | Processamento da lógica de controle e conectividade Wi-Fi. |
+| **Firmware** | MicroPython | Linguagem de programação embarcada. |
+| **Comunicação** | Protocolo MQTT | Envio de dados em tempo real para o dashboard. |
+| **Broker IoT** | Shiftr.io | Servidor MQTT para hospedagem do dashboard. |
+| **Simulação** | Wokwi | Ambiente de simulação online para o circuito e firmware. |
+| **Sensores/Atuadores** | DHT22 (simulado), Módulo Relé | Simulação de leitura de umidade/temperatura e controle da bomba. |
 
-- Verificar a umidade do solo em ciclos contínuos
+## Funcionamento Detalhado
 
-- Acionar a bomba caso a umidade esteja abaixo do limite configurado
+### 1. Leitura de Umidade
 
-- Reduzir o nível de água do reservatório a cada ciclo de irrigação
+O ESP32 realiza leituras periódicas do sensor DHT22 (conectado ao pino `GPIO4`). Para fins de simulação no Wokwi, a umidade lida é interpretada como a **umidade do solo**.
 
-- Bloquear a irrigação quando o nível do reservatório estiver baixo
+### 2. Lógica de Controle da Bomba
 
-- Reabastecer o reservatório através de um botão físico
+A lógica de controle é baseada em um limiar de umidade:
+*   Se a umidade estiver **abaixo** do valor configurado (solo seco), o relé é ativado, ligando a bomba d'água.
+*   Cada ciclo de irrigação bem-sucedido reduz o nível de água do reservatório internamente.
+*   Se o nível de água atingir o mínimo definido, o sistema **bloqueia** o acionamento da bomba e ativa um LED indicador de reservatório vazio.
 
-- Enviar todos os dados para visualização em dashboard MQTT no Shiftr.io
+### 3. Reabastecimento do Reservatório
 
-## **Objetivos do Projeto**
+Um botão físico (conectado ao pino `GPIO23`) simula o reabastecimento do reservatório. Ao ser pressionado, o nível de água interno é restaurado para **100%**, permitindo que novos ciclos de irrigação sejam iniciados.
 
-- Simular um sistema IoT funcional utilizando ESP32 no Wowki.
+### 4. Dashboard IoT (Shiftr.io)
 
-- Monitorar parâmetros ambientais em tempo real.
+O microcontrolador publica continuamente os seguintes dados no broker MQTT do Shiftr.io:
+*   `Umidade atual do solo`
+*   `Temperatura` (lida pelo DHT22)
+*   `Estado da bomba` (Ativa/Desativada)
+*   `Nível de água`
 
-- Automatizar a irrigação com regras de controle.
+A visualização e o acompanhamento em tempo real podem ser feitos diretamente pelo painel do Shiftr.io ou por qualquer cliente MQTT configurado.
 
-- Implementar comunicação MQTT com dashboard externo.
+## Simulação Completa no Wokwi
 
+O projeto foi integralmente montado e testado no simulador Wokwi, garantindo a reprodutibilidade do circuito e do firmware.
 
-## **Funcionamento Detalhado**
+**Componentes Simulados:**
+*   ESP32 DevKit
+*   Sensor DHT22
+*   Módulo Relé
+*   LEDs indicadores
+*   Botão de reabastecimento
+*   Protoboard e conexões
 
-1. Leitura de Umidade
+O link direto para a simulação está disponível no arquivo `wowki-project.txt` no repositório.
 
-- O ESP32 realiza leituras periódicas do sensor DHT22 conectado ao pino GPIO4.
+## Estrutura do Repositório
 
-- A umidade lida é interpretada como “umidade do solo” para fins de simulação.
+| Arquivo/Diretório | Descrição |
+| :--- | :--- |
+| `diagram.json` | Arquivo de configuração do circuito completo para simulação no Wokwi. |
+| `main.py` | Firmware principal em MicroPython, contendo toda a lógica de controle e comunicação MQTT. |
+| `README.md` | Documentação detalhada do projeto (este arquivo). |
+| `wowki-project.txt` | Link direto para o projeto no simulador Wokwi. |
 
-2. Lógica de Controle da Bomba
+## Como Executar
 
-- Se a umidade estiver abaixo do valor configurado (solo seco), o ESP32 ativa o relé que controla a bomba d’água.
+Para testar e visualizar o projeto, siga os passos abaixo:
 
-- Cada acionamento reduz o nível do reservatório internamente.
+1.  **Acessar o Wokwi:** Abra o link do projeto contido no arquivo `wowki-project.txt`.
+2.  **Executar o Firmware:** Inicie a simulação no Wokwi para executar o script `main.py` no ESP32.
+3.  **Monitorar o Dashboard:** Acesse o broker Shiftr.io para visualizar as leituras em tempo real.
+4.  **Interagir:** Utilize o botão físico simulado para reabastecer a caixa d’água e observe a lógica de controle da bomba.
 
-- Se o nível de água atingir o mínimo definido, o sistema bloqueia a bomba e ativa um LED indicador.
+## Possíveis Extensões
 
-3. Reabastecimento do Reservatório
+O projeto pode ser expandido com as seguintes melhorias:
 
-- O circuito possui um botão físico conectado ao pino GPIO23.
-
-- Quando pressionado, o nível de água é restaurado para 100%, permitindo novos ciclos de irrigação.
-
-4. Dashboard IoT
-
-O ESP32 publica dados no broker MQTT do Shiftr.io, permitindo acompanhar:
-
-- Umidade atual do solo
-
-- Temperatura (do DHT22)
-
-- Estado da bomba
-
-- Nível de água
-
-A visualização pode ser feita pelo painel do Shiftr.io ou qualquer cliente MQTT.
-
-5. Simulação Completa no Wokwi
-
-O circuito foi montado integralmente no simulador Wokwi, incluindo:
-
-- ESP32 DevKit
-
-- Sensor DHT22
-
-- Módulo Relé
-
-- LEDs indicadores
-
-- Botão de reabastecimento
-
-- Protoboard e conexões internas
-
-O projeto pode ser acessado pelo link presente no repositório.
-
-## **Tecnologias Utilizadas**
-
-- ESP32 DevKit V1
-
-- MicroPython
-
-- Protocolo MQTT
-
-- Broker Shiftr.io
-
-- Simulador Wokwi
-
-- Módulo Relé
-
-- DHT22 (simulação de umidade do solo)
-
-## **Como Executar**
-
-1. Abrir o projeto diretamente no Wokwi.
-
-2. Executar o script principal main.py no microcontrolador.
-
-3. Acessar o broker Shiftr.io.
-
-4. Visualizar as leituras em tempo real.
-
-5. Interagir via botão físico simulando o reabastecimento da caixa d’água.
-
-## **Estrutura do Repositório**
-
-- /diagram.json — circuito completo para simulação no Wokwi
-
-- /main.py — firmware MicroPython responsável por toda a lógica
-
-- README.md — documentação do projeto
-
-- wowki-project.txt — Link do projeto do Wowki
-
-
-## **Possíveis Extensões**
-
-- Envio de alertas para Telegram ou e-mail
-
-- Utilização de sensor de umidade do solo real fora da simulação
-
-- Adição de display OLED para exibir valores localmente
+*   **Notificações:** Implementação de envio de alertas para plataformas como Telegram ou e-mail em caso de reservatório vazio ou falha na irrigação.
+*   **Hardware Real:** Substituição do sensor DHT22 simulado por um sensor de umidade do solo real (capacitivo ou resistivo) para aplicação em hardware físico.
+*   **Interface Local:** Adição de um display OLED ou LCD para exibir os valores de umidade e nível de água localmente, sem depender do dashboard.
+*   **Configuração Remota:** Adicionar a capacidade de configurar o limiar de umidade remotamente via MQTT.
